@@ -28,7 +28,13 @@ We will allocate a, b, and c to an area on the stack, probably right next to eac
 
 What is weird is that we don't really want loads and stores anymore. For a two input, one output ALU, what we really want is 3 address and potentially some masks and shifts.
 
-So an add instruction might look something like this:
+First let's write what the instruction might look like in a hypothetical 64bit world with some kind of very CISCy instructions:
+
+```
+  add.64 sp[128], sp[0], sp[64] 
+```
+
+We can convert that into a more complicate instruction that might look something like this:
 
 ```
   (add.64 (adderress sp (info-dest)) (sp (src1-info)) (sp (src2-info)) 
@@ -60,6 +66,16 @@ The great thing about a TLB miss is that we can handle it in regular code in a p
 What's great about this architecture is that hardware and software are working together to make hardware thread scheduling practical. Since the hardware already needs to deal with a variety of asynchrnous events that might already delay and retry executing an instruction.
 
 Having many hardware threads is that we can do useful work while stalled waiting for memory. This doesn't make single threaded programs any faster but may lead to big speedups in multi-threaded workloads.
+
+## branches
+
+unconditional branches are kind of easy to imagine how to handle - we simply modify the pc and continue executing.
+
+there are a bunch of ways to do conditional branches, though we can probably just have "branch if zero (cacheline+mask)"
+
+indirect branches are pretty similar really.
+
+most architectures also have "call" instructions though it is not clear if we need that here. the caller can be responsible for putting it's return address on the stack before executing one of the other branch types. this adds more instructions but might other things simpler. We still haven't used our scratch space yet...
 
 ## Messages
 
